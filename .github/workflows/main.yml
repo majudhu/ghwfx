@@ -1,0 +1,32 @@
+name: main
+
+on: ["workflow_dispatch", "push"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: show node and npm vertsion
+        run: |
+          node --version 
+          npm --version
+      - name: set commit message and origin
+        run: |
+          echo "commit_msg=`git log -1 --format=format:%s`" >> $GITHUB_ENV
+          echo "origin_url=`git remote get-url origin`" >> $GITHUB_ENV
+          node --version 
+          npm --version
+
+      - name: up pages
+        run: |
+          mkdir x
+          cd x
+          git init  --initial-branch=gh-pages
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git config -l
+          echo ${{ env.commit_msg }} ${{ env.origin_url }} >> file
+          git add file
+          git commit -m "$(git -C .. log -1 --format=format:%s)"
+          git push -f "https://${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}"
