@@ -29,4 +29,4 @@ jobs:
           echo ${{ env.commit_msg }} ${{ env.origin_url }} >> file
           git add file
           git commit -m "$(git -C .. log -1 --format=format:%s)"
-          git push -f "https://git:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          git push -f "https://neohotsauce:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
