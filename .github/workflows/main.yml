@@ -46,28 +46,28 @@ jobs:
   npmcicache:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: actions/cache@v2
         with: { path: ~/.npm, key: dot-npm }
-      - uses: actions/checkout@v2
       - run: npm ci
       
   setupnode:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with: 
           node-version: 14
           cache: npm
-      - uses: actions/checkout@v2
       - run: npm i
       
   npminosave:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with: 
           node-version: 14
           cache: npm
-      - uses: actions/checkout@v2
       - run: npm i --no-save
       
