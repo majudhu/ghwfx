@@ -11,22 +11,29 @@ jobs:
         run: |
           node --version 
           npm --version
-      - name: set commit message and origin
-        run: |
-          echo "commit_msg=`git log -1 --format=format:%s`" >> $GITHUB_ENV
-          echo "origin_url=`git remote get-url origin`" >> $GITHUB_ENV
-          node --version 
-          npm --version
 
-      - name: up pages
-        run: |
-          mkdir x
-          cd x
-          git init  --initial-branch=gh-pages
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git config -l
-          echo ${{ env.commit_msg }} ${{ env.origin_url }} >> file
-          git add file
-          git commit -m "$(git -C .. log -1 --format=format:%s)"
-          git push -f "https://neohotsauce:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJSON(job) }}
+        run: echo "$JOB_CONTEXT"
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJSON(steps) }}
+        run: echo "$STEPS_CONTEXT"
+      - name: Dump runner context
+        env:
+          RUNNER_CONTEXT: ${{ toJSON(runner) }}
+        run: echo "$RUNNER_CONTEXT"
+      - name: Dump strategy context
+        env:
+          STRATEGY_CONTEXT: ${{ toJSON(strategy) }}
+        run: echo "$STRATEGY_CONTEXT"
+      - name: Dump matrix context
+        env:
+          MATRIX_CONTEXT: ${{ toJSON(matrix) }}
+        run: echo "$MATRIX_CONTEXT"
+
