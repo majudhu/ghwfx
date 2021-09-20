@@ -36,4 +36,38 @@ jobs:
         env:
           MATRIX_CONTEXT: ${{ toJSON(matrix) }}
         run: echo "$MATRIX_CONTEXT"
-
+        
+  npmci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: npm ci
+      
+  npmcicache:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/cache@v2
+        with: { path: ~/.npm, key: dot-npm }
+      - uses: actions/checkout@v2
+      - run: npm ci
+      
+  setupnode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v2
+        with: 
+          node-version: lts
+          cache: npm
+      - uses: actions/checkout@v2
+      - run: npm i
+      
+  npminosave:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v2
+        with: 
+          node-version: lts
+          cache: npm
+      - uses: actions/checkout@v2
+      - run: npm i --no-save
+      
