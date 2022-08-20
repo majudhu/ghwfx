@@ -18,7 +18,7 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
       - name: Show repo name
         env: 
-          REPO: ${{ github.event.repository }}
+          REPO: ${{ github.event.repository.name }}
         run: echo "$REPO"
       - name: Dump job context
         env:
