@@ -93,6 +93,7 @@ jobs:
             - args: [--global, surge]
       - uses: actions/setup-node@v3
         with: 
-          node-version: 16
+          node-version: lts/*
           cache: pnpm
+      - run: surge --version
       
