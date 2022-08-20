@@ -86,10 +86,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: sudo npm -g i pnpm
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with: 
-          node-version: 14
+          node-version: 16
           cache: pnpm
-      - run: pnpm install
+      - uses: pnpm/action-setup@v2.2.2
+        #with:
+        #  version: 7
       
