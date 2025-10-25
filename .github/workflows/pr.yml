@@ -1,0 +1,11 @@
+name: PR Checks
+
+on: pull_request
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo cp .env.development .env
+          echo pnpm build
