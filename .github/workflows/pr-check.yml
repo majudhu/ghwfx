@@ -44,8 +44,8 @@ jobs:
               } else {
                 body = `## ⚠️ Outdated Dependencies Detected\n<details>
             <summary>Found **${packages.length}** outdated package${packages.length > 1 ? 's' : ''}</summary>
-                          | Package | Current | Wanted | Latest | Type |
-                          |---------|---------|--------|--------|------|\n`
+            | Package | Current | Wanted | Latest | Type |
+            |---------|---------|--------|--------|------|\n`
 
                 for (const [pkg, info] of packages)
                   body += `| ${pkg} | ${info.current || '-'} | ${info.wanted || '-'} | ${info.latest || '-'} | ${info.dependencyType || '-'} |\n`;
@@ -73,10 +73,10 @@ jobs:
 
             if (lintFiles === 0) body += "## ✅ ESLint\n\nNo problems found.";
             else body += `## ⚠️ ESLint Issues\n
-                      <details><summary>Found **${lintErrors}** error${lintErrors !== 1 ? "s" : ""} \
-                      and **${lintWarnings}** warning${lintWarnings !== 1 ? "s" : ""} \
-                      across **${lintFiles}** file${lintFiles !== 1 ? "s" : ""}.</summary>\n
-                      ${eslintBody}</details>\n---\n*Run \`pnpm lint --fix\` to attempt automatic fixes or review issues manually.*`;
+            <details><summary>Found **${lintErrors}** error${lintErrors !== 1 ? "s" : ""} \
+            and **${lintWarnings}** warning${lintWarnings !== 1 ? "s" : ""} \
+            across **${lintFiles}** file${lintFiles !== 1 ? "s" : ""}.</summary>\n
+            ${eslintBody}</details>\n---\n*Run \`pnpm lint --fix\` to attempt automatic fixes or review issues manually.*`;
 
             await core.summary.addRaw(body).write();
 
