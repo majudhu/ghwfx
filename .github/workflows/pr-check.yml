@@ -50,7 +50,7 @@ jobs:
                 for (const [pkg, info] of packages)
                   body += `| ${pkg} | ${info.current || '-'} | ${info.wanted || '-'} | ${info.latest || '-'} | ${info.dependencyType || '-'} |\n`;
 
-                body += "</details>\n---\n*Run `pnpm outdated` locally for more details or `pnpm update` to update dependencies.*";
+                body += "</details>\n---\n*Run `pnpm outdated` locally for more details or `pnpm update` to update dependencies.*\n";
               }
             }
 
