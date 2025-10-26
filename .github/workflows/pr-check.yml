@@ -43,7 +43,7 @@ jobs:
                 body = "## ✅ Dependencies\n\nAll dependencies are up to date.";
               } else {
                 body = `## ⚠️ Outdated Dependencies Detected\n<details>
-            <summary>Found **${packages.length}** outdated package${packages.length > 1 ? 's' : ''}</summary>
+            <summary>Found **${packages.length}** outdated package${packages.length > 1 ? 's' : ''}</summary>\n
             | Package | Current | Wanted | Latest | Type |
             |---------|---------|--------|--------|------|\n`
 
