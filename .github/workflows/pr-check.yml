@@ -27,10 +27,10 @@ jobs:
             
       - name: Comment outdated dependencies on PR
         uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
         env:
             OUTDATED: ${{ steps.outdated.outputs.outdated }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const outdatedRaw = process.env.OUTDATED.trim();
             if (!outdatedRaw || outdatedRaw === '{}') return;
