@@ -32,15 +32,7 @@ jobs:
         #   OUTDATED: ${{ steps.outdated.outputs.outdated }}
         with:
           script: |
-            try {
-            const execOut = await exec.getExecOutput("pnpm", ["outdated", "--json"]);
-            console.log(execOut);
-            } catch (error) {
-              console.log('Error executing pnpm outdated:', error);
-            }
-            const execOut = await exec.getExecOutput("pnpm", ["outdated", "--json"]);
-
-            console.log(execOut);
+            const execOut = await exec.getExecOutput("pnpm", ["outdated", "--json"], { ignoreReturnCode: true });
 
             if (!execOut.exitCode || !execOut.stdout || execOut.stdout === '{}') return;
             
