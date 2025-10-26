@@ -34,9 +34,9 @@ jobs:
           script: |
             const outdatedRaw = process.env.OUTDATED.trim();
             if (!outdatedRaw || outdatedRaw === '{}') return;
-            let packages;
+            let packagesObj;
             try {
-                packages = JSON.parse(outdatedRaw);
+                packagesObj = JSON.parse(outdatedRaw);
             } catch (e) {
                 return await github.rest.issues.createComment({
                     owner: context.repo.owner,
@@ -54,7 +54,7 @@ jobs:
                 });
             }
 
-            const packages = Object.entries(packages)
+            const packages = Object.entries(packagesObj)
 
             if (packages.length === 0) return;
 
