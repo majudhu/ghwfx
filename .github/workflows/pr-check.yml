@@ -11,12 +11,13 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 10
-          run_install: true
 
       - uses: actions/setup-node@v3
         with:
           node-version:
           cache: 'pnpm'
+
+      - run: pnpm install
 
       # - name: Comment outdated dependencies on PR
       #   id: outdated
@@ -31,6 +32,12 @@ jobs:
         #   OUTDATED: ${{ steps.outdated.outputs.outdated }}
         with:
           script: |
+            try {
+            const execOut = await exec.getExecOutput("pnpm", ["outdated", "--json"]);
+            console.log(execOut);
+            } catch (error) {
+              console.log('Error executing pnpm outdated:', error);
+            }
             const execOut = await exec.getExecOutput("pnpm", ["outdated", "--json"]);
 
             console.log(execOut);
