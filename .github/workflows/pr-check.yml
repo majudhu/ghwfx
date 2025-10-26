@@ -32,49 +32,48 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-              const outdatedRaw = process.env.OUTDATED.trim();
-              if (!outdatedRaw || outdatedRaw === '{}') return;
-              let packagesObj;
-              try {
-                packagesObj = JSON.parse(outdatedRaw);
-              } catch (e) {
-                return await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  body: `## ⚠️ Outdated Dependencies Detected\n
-              **Error parsing dependency data.** \n
-              Error: ${e.message}\n
-              Raw output:\n
-              \`\`\`json
-              ${outdatedRaw}
-              \`\`\`\n
-              ---
-              *Run \`pnpm outdated\` locally for more details.*`
-                });
-              }
-
-              const packages = Object.entries(packagesObj)
-
-              if (packages.length === 0) return;
-
-              let body = `## ⚠️ Outdated Dependencies Detected\n
-              Found **${packages.length}** outdated package${packages.length > 1 ? 's' : ''}:\n
-              | Package | Current | Wanted | Latest | Type |\n;
-              |---------|---------|--------|--------|------|\n;
-                        `
-
-              for (const [pkg, info] of packages)
-                body += `| ${pkg} | ${info.current || '-'} | ${info.wanted || '-'} | ${info.latest || '-'} | ${info.dependencyType || '-'} |\n`;
-
-              body += "\n---\n*Run `pnpm outdated` locally for more details or `pnpm update` to update dependencies.*";
-
-              await github.rest.issues.createComment({
+            const outdatedRaw = process.env.OUTDATED.trim();
+            if (!outdatedRaw || outdatedRaw === '{}') return;
+            let packagesObj;
+            try {
+              packagesObj = JSON.parse(outdatedRaw);
+            } catch (e) {
+              return await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body
+                body: `## ⚠️ Outdated Dependencies Detected\n
+            **Error parsing dependency data.** \n
+            Error: ${e.message}\n
+            Raw output:\n
+            \`\`\`json
+            ${outdatedRaw}
+            \`\`\`\n
+            ---
+            *Run \`pnpm outdated\` locally for more details.*`
               });
+            }
+
+            const packages = Object.entries(packagesObj)
+
+            if (packages.length === 0) return;
+
+            let body = `## ⚠️ Outdated Dependencies Detected\n
+            Found **${packages.length}** outdated package${packages.length > 1 ? 's' : ''}:\n
+            | Package | Current | Wanted | Latest | Type |\n
+            |---------|---------|--------|--------|------|\n`
+
+            for (const [pkg, info] of packages)
+              body += `| ${pkg} | ${info.current || '-'} | ${info.wanted || '-'} | ${info.latest || '-'} | ${info.dependencyType || '-'} |\n`;
+
+            body += "\n---\n*Run `pnpm outdated` locally for more details or `pnpm update` to update dependencies.*";
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
 
       - run: |
           echo "## Outdated Packages" >> $GITHUB_STEP_SUMMARY
