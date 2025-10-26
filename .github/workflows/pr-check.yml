@@ -1,0 +1,40 @@
+name: PR Checks
+
+on: pull_request
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:    
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 
+          cache: 'pnpm'
+    
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: true
+
+      - name: Comment outdated dependencies on PR
+        run: |
+            echo 'outdated<<EOF' >> $GITHUB_OUTPUT
+            pnpm outdated --format json >> "$GITHUB_OUTPUT" || true
+            echo 'EOF' >> $GITHUB_OUTPUT
+            
+
+      - run: |
+          echo "## Outdated Packages" >> $GITHUB_STEP_SUMMARY
+          pnpm outdated >> "$GITHUB_STEP_SUMMARY" || true
+        continue-on-error: true
+      - run: |
+          echo "## Typecheck" >> $GITHUB_STEP_SUMMARY
+          pnpm tsc >> "$GITHUB_STEP_SUMMARY" || true
+        continue-on-error: true
+      - run: |
+          echo "## Eslint" >> $GITHUB_STEP_SUMMARY
+          pnpm lint >> "$GITHUB_STEP_SUMMARY" || true
+        continue-on-error: true
+      
