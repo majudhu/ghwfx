@@ -36,7 +36,7 @@ jobs:
 
             const execOut = await exec.getExecOutput("pnpm", ["outdated", "--json"], { ignoreReturnCode: true });
             if (!execOut.exitCode || !execOut.stdout || execOut.stdout === '{}') {
-              body = "## ✅ Dependencies\n\nAll dependencies are up to date.";
+              body = "## ✅ Dependencies\n\nAll dependencies are up to date.\n\n";
             } else {
               const packages = Object.entries(JSON.parse(execOut.stdout));
               if (packages.length === 0) {
@@ -50,7 +50,7 @@ jobs:
                 for (const [pkg, info] of packages)
                   body += `| ${pkg} | ${info.current || '-'} | ${info.wanted || '-'} | ${info.latest || '-'} | ${info.dependencyType || '-'} |\n`;
 
-                body += "</details>\n---\n*Run `pnpm outdated` locally for more details or `pnpm update` to update dependencies.*\n";
+                body += "</details>\n---\n*Run `pnpm outdated` locally for more details or `pnpm update` to update dependencies.*\n\n";
               }
             }
 
