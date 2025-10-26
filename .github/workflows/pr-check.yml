@@ -60,7 +60,7 @@ jobs:
 
             let body = `## ⚠️ Outdated Dependencies Detected\n
             Found **${packages.length}** outdated package${packages.length > 1 ? 's' : ''}:\n
-            | Package | Current | Wanted | Latest | Type |\n
+            | Package | Current | Wanted | Latest | Type |
             |---------|---------|--------|--------|------|\n`
 
             for (const [pkg, info] of packages)
