@@ -8,7 +8,7 @@ jobs:
     steps:
       - run: |
             echo 'outdated<<EOF' >> $GITHUB_OUTPUT
-            pnpm outdated --format json >> "$GITHUB_OUTPUT"
+            pnpm outdated --format json >> "$GITHUB_OUTPUT" || true
             echo 'EOF' >> $GITHUB_OUTPUT
         continue-on-error: true
 
@@ -19,6 +19,7 @@ jobs:
           echo "- Lets add a bullet point" >> $GITHUB_STEP_SUMMARY
           echo "- Lets add a second bullet point" >> $GITHUB_STEP_SUMMARY
           echo "- How about a third one?" >> $GITHUB_STEP_SUMMARY
+          pnpm outdated >> $GITHUB_STEP_SUMMARY
       
 
           
