@@ -30,13 +30,12 @@ jobs:
         env:
           OUTDATED: ${{ steps.outdated.outputs.outdated }}
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const outdatedRaw = process.env.OUTDATED.trim();
             if (!outdatedRaw || outdatedRaw === '{}') return;
-            let packagesObj;
+            let packages;
             try {
-              packagesObj = JSON.parse(outdatedRaw);
+              packages = Object.entries(JSON.parse(outdatedRaw));
             } catch (e) {
               return await github.rest.issues.createComment({
                 owner: context.repo.owner,
@@ -45,7 +44,7 @@ jobs:
                 body: `## ⚠️ Outdated Dependencies Detected\n
             **Error parsing dependency data.** \n
             Error: ${e.message}\n
-            Raw output:\n
+            Raw output:
             \`\`\`json
             ${outdatedRaw}
             \`\`\`\n
@@ -53,8 +52,6 @@ jobs:
             *Run \`pnpm outdated\` locally for more details.*`
               });
             }
-
-            const packages = Object.entries(packagesObj)
 
             if (packages.length === 0) return;
 
