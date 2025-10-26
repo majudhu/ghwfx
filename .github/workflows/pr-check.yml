@@ -50,7 +50,7 @@ jobs:
                 for (const [pkg, info] of packages)
                   body += `| ${pkg} | ${info.current || '-'} | ${info.wanted || '-'} | ${info.latest || '-'} | ${info.dependencyType || '-'} |\n`;
 
-                body += "</details>\n---\n*Run `pnpm outdated` locally for more details or `pnpm update` to update dependencies.*\n\n";
+                body += "</details>\n\n\n---\n*Run `pnpm outdated` locally for more details or `pnpm update` to update dependencies.*\n\n";
               }
             }
 
@@ -76,7 +76,7 @@ jobs:
             <details><summary>Found **${lintErrors}** error${lintErrors !== 1 ? "s" : ""} \
             and **${lintWarnings}** warning${lintWarnings !== 1 ? "s" : ""} \
             across **${lintFiles}** file${lintFiles !== 1 ? "s" : ""}.</summary>\n
-            ${eslintBody}</details>\n---\n*Run \`pnpm lint --fix\` to attempt automatic fixes or review issues manually.*`;
+            ${eslintBody}</details>\n\n\n---\n*Run \`pnpm lint --fix\` to attempt automatic fixes or review issues manually.*`;
 
             await core.summary.addRaw(body).write();
 
