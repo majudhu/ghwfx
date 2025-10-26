@@ -5,8 +5,11 @@ on: pull_request
 jobs:
   check:
     runs-on: ubuntu-latest
-    steps:
-      - run: |
+    steps:    
+      - uses: pnpm/action-setup@v4
+
+      - name: Comment outdated dependencies on PR
+        run: |
             echo 'outdated<<EOF' >> $GITHUB_OUTPUT
             pnpm outdated --format json >> "$GITHUB_OUTPUT" || true
             echo 'EOF' >> $GITHUB_OUTPUT
