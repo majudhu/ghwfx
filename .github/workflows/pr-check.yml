@@ -78,6 +78,9 @@ jobs:
             across <b>${lintFiles}</b> file${lintFiles !== 1 ? "s" : ""}.</summary>\n
             ${eslintBody}</details>\n\n\n---\n*Run \`pnpm lint --fix\` to attempt automatic fixes or review issues manually.*`;
 
+            const typecheck = await exec.getExecOutput("pnpm", ["tsc", "--noEmit"], { ignoreReturnCode: true });
+            body += `\n\n## Typecheck\n\n<details>\n<summary>TypeScript errors</summary>${typecheck.stdout}\n</details>\n`;
+
             await core.summary.addRaw(body).write();
 
             await github.rest.issues.createComment({
@@ -90,6 +93,7 @@ jobs:
 
       - run: |
           echo "## Typecheck" >> $GITHUB_STEP_SUMMARY
-          pnpm tsc >> "$GITHUB_STEP_SUMMARY"
+          pnpm tsc >> "$GITHUB_STEP_SUMMARY" 
+          gh pr comment ${{ github.event.pull_request.number }} --body-file "$GITHUB_STEP_SUMMARY"
         continue-on-error: true
         
