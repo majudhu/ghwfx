@@ -65,7 +65,7 @@ jobs:
                   .replace(/\|/g, "\\|")
                   .replace(/\r?\n/g, " ");
 
-              const severity = ["ℹ️", "⚠️", "‼️"];
+              const severityIcons = ["ℹ️", "⚠️", "‼️"];
 
               let body = "## ⚠️ ESLint Issues\n\n";
               body += `Found **${issues.length}** issue${issues.length > 1 ? "s" : ""} across **${affectedFiles}** file${affectedFiles > 1 ? "s" : ""}.\n\n`;
@@ -77,7 +77,7 @@ jobs:
                 const line = issue.line ?? "-";
                 const column = issue.column ?? "-";
                 const rule = escapeMarkdown(issue.ruleId || "—");
-                const severity = severity[issue.severity] || "ℹ️";
+                const severity = severityIcons[issue.severity] || "ℹ️";
                 const message = escapeMarkdown(issue.message);
 
                 body += `| ${file} | ${line} | ${column} | ${rule} | ${severity} | ${message} |\n`;
