@@ -52,8 +52,7 @@ jobs:
               }
             }            
 
-            const eslint = new (require("eslint")).ESLint();
-            const results = await eslint.lintFiles(".");
+            const results = await (new (require("eslint")).ESLint()).lintFiles(".");
             let lintFiles = 0;
             let lintErrors = 0;
             let lintWarnings = 0;
@@ -72,8 +71,8 @@ jobs:
 
             if (lintFiles === 0) body += "## ✅ ESLint\n\nNo problems found.";
             else body += `## ⚠️ ESLint Issues\n
-            Found **${lintErrors}** error${lintErrors !== 1 ? "s" : ""}
-            and **${lintWarnings}** warning${lintWarnings !== 1 ? "s" : ""}
+            Found **${lintErrors}** error${lintErrors !== 1 ? "s" : ""} \
+            and **${lintWarnings}** warning${lintWarnings !== 1 ? "s" : ""} \
             across **${lintFiles}** file${lintFiles !== 1 ? "s" : ""}.\n
             ${eslintBody}\n---\n*Run \`pnpm lint --fix\` to attempt automatic fixes or review issues manually.*`;
 
