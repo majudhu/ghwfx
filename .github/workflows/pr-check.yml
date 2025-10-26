@@ -64,7 +64,26 @@ jobs:
           echo "## Typecheck" >> $GITHUB_STEP_SUMMARY
           pnpm tsc >> "$GITHUB_STEP_SUMMARY"
         continue-on-error: true
-      - run: |
-          echo "## Eslint" >> $GITHUB_STEP_SUMMARY
-          pnpm lint >> "$GITHUB_STEP_SUMMARY"
-        continue-on-error: true
+        
+      - name: Comment outdated dependencies on PR
+        uses: actions/github-script@v7
+        # env:
+        #   OUTDATED: ${{ steps.outdated.outputs.outdated }}
+        with:
+          script: |
+            import { ESLint } from "eslint";
+            const eslint = new ESLint({});
+            const results = await eslint.lintFiles(["."]);
+            const formatter = await eslint.loadFormatter("json");
+            const resultText = formatter.format(results);
+
+            if (!resultText) return;
+
+            await core.summary.addRaw(resultText).write();
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: resultText
+            });
