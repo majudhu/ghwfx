@@ -31,11 +31,11 @@ jobs:
         #   OUTDATED: ${{ steps.outdated.outputs.outdated }}
         with:
           script: |
-            const execOutdated = await exec.getExecOutput("pnpm", ["outdated", "--json"]);
+            const execOut = await exec.getExecOutput("pnpm", ["outdated", "--json"]);
 
-            if (!execOutdated.exitCode || execOutdated.stderr === '{}') return;
+            if (!execOut.exitCode || execOut.stdout === '{}') return;
             
-            const packages = Object.entries(JSON.parse(execOutdated.stderr));
+            const packages = Object.entries(JSON.parse(execOut.stdout));
 
             if (packages.length === 0) return;
 
