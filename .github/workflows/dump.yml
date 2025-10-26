@@ -1,9 +1,9 @@
-name: main
+name: dump
 
-on: ["workflow_dispatch", "push"]
+on: ["workflow_dispatch"]
 
 jobs:
-  build:
+  dump:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
