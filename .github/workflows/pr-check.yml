@@ -31,27 +31,11 @@ jobs:
           OUTDATED: ${{ steps.outdated.outputs.outdated }}
         with:
           script: |
-            const outdatedRaw = process.env.OUTDATED.trim();
-            if (!outdatedRaw || outdatedRaw === '{}') return;
-            let packages;
-            try {
-              packages = Object.entries(JSON.parse(outdatedRaw));
-            } catch (e) {
-              return await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: `## ⚠️ Outdated Dependencies Detected\n
-            **Error parsing dependency data.** \n
-            Error: ${e.message}\n
-            Raw output:
-            \`\`\`json
-            ${outdatedRaw}
-            \`\`\`\n
-            ---
-            *Run \`pnpm outdated\` locally for more details.*`
-              });
-            }
+            const execOutdated = await exec.getExecOutput("pnpm", ["outdated", "--json"]);
+
+            if (!execOutdated.exitCode || outdatedRaw.stdout === '{}') return;
+            
+            const packages = Object.entries(JSON.parse(outdatedRaw.stdout));
 
             if (packages.length === 0) return;
 
@@ -64,6 +48,8 @@ jobs:
               body += `| ${pkg} | ${info.current || '-'} | ${info.wanted || '-'} | ${info.latest || '-'} | ${info.dependencyType || '-'} |\n`;
 
             body += "\n---\n*Run `pnpm outdated` locally for more details or `pnpm update` to update dependencies.*";
+            
+            await core.summary.addRaw(body).write();
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -71,6 +57,7 @@ jobs:
               issue_number: context.issue.number,
               body
             });
+
 
       - run: |
           echo "## Outdated Packages" >> $GITHUB_STEP_SUMMARY
