@@ -26,38 +26,74 @@ jobs:
       #     pnpm outdated --format json >> "$GITHUB_OUTPUT" || true
       #     echo 'EOF' >> $GITHUB_OUTPUT
 
-      - name: Comment outdated dependencies on PR
+      - name: Comment outdated dependencies, typecheck and lint on PR
         uses: actions/github-script@v7
         # env:
         #   OUTDATED: ${{ steps.outdated.outputs.outdated }}
         with:
           script: |
+            let body = "";
+          
             const execOut = await exec.getExecOutput("pnpm", ["outdated", "--json"], { ignoreReturnCode: true });
+            if (!execOut.exitCode || !execOut.stdout || execOut.stdout === '{}') {
+              body = "## ✅ Dependencies\n\nAll dependencies are up to date.";
+            } else {              
+              const packages = Object.entries(JSON.parse(execOut.stdout));
+              if (packages.length === 0) {
+                body = `## ⚠️ Outdated Dependencies Detected\n
+                Found **${packages.length}** outdated package${packages.length > 1 ? 's' : ''}:\n
+                | Package | Current | Wanted | Latest | Type |
+                |---------|---------|--------|--------|------|\n`
 
-            if (!execOut.exitCode || !execOut.stdout || execOut.stdout === '{}') return;
-            
-            const packages = Object.entries(JSON.parse(execOut.stdout));
+                for (const [pkg, info] of packages)
+                  body += `| ${pkg} | ${info.current || '-'} | ${info.wanted || '-'} | ${info.latest || '-'} | ${info.dependencyType || '-'} |\n`;
 
-            if (packages.length === 0) return;
+                body += "\n---\n*Run `pnpm outdated` locally for more details or `pnpm update` to update dependencies.*";
+              }
+            }            
 
-            let body = `## ⚠️ Outdated Dependencies Detected\n
-            Found **${packages.length}** outdated package${packages.length > 1 ? 's' : ''}:\n
-            | Package | Current | Wanted | Latest | Type |
-            |---------|---------|--------|--------|------|\n`
+            const eslint = new (require("eslint")).ESLint();
+            const results = await eslint.lintFiles(".");
+            const issues = results.flatMap(r => r.messages);
 
-            for (const [pkg, info] of packages)
-              body += `| ${pkg} | ${info.current || '-'} | ${info.wanted || '-'} | ${info.latest || '-'} | ${info.dependencyType || '-'} |\n`;
+            if (issues.length === 0) {
+              body += "## ✅ ESLint\n\nNo problems found.";
+            } else {
+              const affectedFiles = results.filter(result => result.messages.length > 0).length;
+              const escapeMarkdown = value =>
+                String(value ?? "-")
+                  .replace(/\|/g, "\\|")
+                  .replace(/\r?\n/g, " ");
 
-            body += "\n---\n*Run `pnpm outdated` locally for more details or `pnpm update` to update dependencies.*";
-            
+              const severity = ["ℹ️", "⚠️", "‼️"];
+
+              let body = "## ⚠️ ESLint Issues\n\n";
+              body += `Found **${issues.length}** issue${issues.length > 1 ? "s" : ""} across **${affectedFiles}** file${affectedFiles > 1 ? "s" : ""}.\n\n`;
+              body += "| File | Line | Column | Rule | Severity | Message |\n";
+              body += "|------|------|--------|------|----------|---------|\n";
+
+              for (const issue of issues) {
+                const file = escapeMarkdown(issue.filePath || "-");
+                const line = issue.line ?? "-";
+                const column = issue.column ?? "-";
+                const rule = escapeMarkdown(issue.ruleId || "—");
+                const severity = severity[issue.severity] || "ℹ️";
+                const message = escapeMarkdown(issue.message);
+
+                body += `| ${file} | ${line} | ${column} | ${rule} | ${severity} | ${message} |\n`;
+              }
+
+              body += "\n---\n*Run `pnpm lint --fix` to attempt automatic fixes or review issues manually.*";
+            }
+
             await core.summary.addRaw(body).write();
 
             await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body
-            });
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body
+              });
 
 
       - run: |
@@ -65,25 +101,3 @@ jobs:
           pnpm tsc >> "$GITHUB_STEP_SUMMARY"
         continue-on-error: true
         
-      - name: Comment outdated dependencies on PR
-        uses: actions/github-script@v7
-        # env:
-        #   OUTDATED: ${{ steps.outdated.outputs.outdated }}
-        with:
-          script: |
-            import { ESLint } from "eslint";
-            const eslint = new ESLint({});
-            const results = await eslint.lintFiles(["."]);
-            const formatter = await eslint.loadFormatter("json");
-            const resultText = formatter.format(results);
-
-            if (!resultText) return;
-
-            await core.summary.addRaw(resultText).write();
-
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: resultText
-            });
