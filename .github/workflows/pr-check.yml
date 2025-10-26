@@ -18,24 +18,24 @@ jobs:
           node-version:
           cache: 'pnpm'
 
-      - name: Comment outdated dependencies on PR
-        id: outdated
-        run: |
-          echo 'outdated<<EOF' >> $GITHUB_OUTPUT
-          pnpm outdated --format json >> "$GITHUB_OUTPUT" || true
-          echo 'EOF' >> $GITHUB_OUTPUT
+      # - name: Comment outdated dependencies on PR
+      #   id: outdated
+      #   run: |
+      #     echo 'outdated<<EOF' >> $GITHUB_OUTPUT
+      #     pnpm outdated --format json >> "$GITHUB_OUTPUT" || true
+      #     echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Comment outdated dependencies on PR
         uses: actions/github-script@v7
-        env:
-          OUTDATED: ${{ steps.outdated.outputs.outdated }}
+        # env:
+        #   OUTDATED: ${{ steps.outdated.outputs.outdated }}
         with:
           script: |
             const execOutdated = await exec.getExecOutput("pnpm", ["outdated", "--json"]);
 
-            if (!execOutdated.exitCode || outdatedRaw.stdout === '{}') return;
+            if (!execOutdated.exitCode || outdatedRaw.stderr === '{}') return;
             
-            const packages = Object.entries(JSON.parse(outdatedRaw.stdout));
+            const packages = Object.entries(JSON.parse(outdatedRaw.stderr));
 
             if (packages.length === 0) return;
 
@@ -59,10 +59,6 @@ jobs:
             });
 
 
-      - run: |
-          echo "## Outdated Packages" >> $GITHUB_STEP_SUMMARY
-          pnpm outdated >> "$GITHUB_STEP_SUMMARY"
-        continue-on-error: true
       - run: |
           echo "## Typecheck" >> $GITHUB_STEP_SUMMARY
           pnpm tsc >> "$GITHUB_STEP_SUMMARY"
