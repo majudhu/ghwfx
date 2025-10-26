@@ -29,10 +29,14 @@ jobs:
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+            OUTDATED: ${{ steps.outdated.outputs.outdated }}
           script: |
-            let packagesObj;
+            const outdatedRaw = process.env.OUTDATED.trim();
+            if (!outdatedRaw || outdatedRaw === '{}') return;
+            let packages;
             try {
-                packagesObj = JSON.parse(${{ steps.outdated.outputs.outdated }});
+                packages = JSON.parse(outdatedRaw);
             } catch (e) {
                 return await github.rest.issues.createComment({
                     owner: context.repo.owner,
@@ -43,14 +47,14 @@ jobs:
                     Error: ${e.message}\n
                     Raw output:\n
                     \`\`\`json
-                    ${{ steps.outdated.outputs.outdated }}
+                    ${outdatedRaw}
                     \`\`\`\n
                     ---
                     *Run \`pnpm outdated\` locally for more details.*`
                 });
             }
 
-            const packages = Object.entries(packagesObj)
+            const packages = Object.entries(packages)
 
             if (packages.length === 0) return;
 
