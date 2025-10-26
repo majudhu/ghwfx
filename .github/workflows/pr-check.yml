@@ -33,9 +33,9 @@ jobs:
           script: |
             const execOutdated = await exec.getExecOutput("pnpm", ["outdated", "--json"]);
 
-            if (!execOutdated.exitCode || outdatedRaw.stderr === '{}') return;
+            if (!execOutdated.exitCode || execOutdated.stderr === '{}') return;
             
-            const packages = Object.entries(JSON.parse(outdatedRaw.stderr));
+            const packages = Object.entries(JSON.parse(execOutdated.stderr));
 
             if (packages.length === 0) return;
 
