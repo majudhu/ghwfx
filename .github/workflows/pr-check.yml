@@ -43,7 +43,7 @@ jobs:
                     Error: ${e.message}\n
                     Raw output:\n
                     \`\`\`json
-                    ${outdatedRaw}
+                    ${{ steps.outdated.outputs.outdated }}
                     \`\`\`\n
                     ---
                     *Run \`pnpm outdated\` locally for more details.*`
