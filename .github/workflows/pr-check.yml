@@ -67,7 +67,7 @@ jobs:
 
               const severityIcons = ["ℹ️", "⚠️", "‼️"];
 
-              let body = "## ⚠️ ESLint Issues\n\n";
+              body += "## ⚠️ ESLint Issues\n\n";
               body += `Found **${issues.length}** issue${issues.length > 1 ? "s" : ""} across **${affectedFiles}** file${affectedFiles > 1 ? "s" : ""}.\n\n`;
               body += "| File | Line | Column | Rule | Severity | Message |\n";
               body += "|------|------|--------|------|----------|---------|\n";
