@@ -1,0 +1,99 @@
+name: PR Checks
+
+on: pull_request
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version:
+          cache: 'pnpm'
+
+      - run: pnpm install
+
+      # - name: Comment outdated dependencies on PR
+      #   id: outdated
+      #   run: |
+      #     echo 'outdated<<EOF' >> $GITHUB_OUTPUT
+      #     pnpm outdated --format json >> "$GITHUB_OUTPUT" || true
+      #     echo 'EOF' >> $GITHUB_OUTPUT
+
+      - name: Comment outdated dependencies, typecheck and lint on PR
+        uses: actions/github-script@v7
+        # env:
+        #   OUTDATED: ${{ steps.outdated.outputs.outdated }}
+        with:
+          script: |
+            let body = "";
+
+            const execOut = await exec.getExecOutput("pnpm", ["outdated", "--json"], { ignoreReturnCode: true });
+            if (!execOut.exitCode || !execOut.stdout || execOut.stdout === '{}') {
+              body = "## ✅ Dependencies\n\nAll dependencies are up to date.\n\n";
+            } else {
+              const packages = Object.entries(JSON.parse(execOut.stdout));
+              if (packages.length === 0) {
+                body = "## ✅ Dependencies\n\nAll dependencies are up to date.";
+              } else {
+                body = `## ⚠️ Outdated Dependencies Detected\n<details>
+            <summary>Found <b>${packages.length}</b> outdated package${packages.length > 1 ? 's' : ''}</summary>\n
+            | Package | Current | Wanted | Latest | Type |
+            |---------|---------|--------|--------|------|\n`
+
+                for (const [pkg, info] of packages)
+                  body += `| ${pkg} | ${info.current || '-'} | ${info.wanted || '-'} | ${info.latest || '-'} | ${info.dependencyType || '-'} |\n`;
+
+                body += "</details>\n\n\n---\n*Run `pnpm outdated` locally for more details or `pnpm update` to update dependencies.*\n\n";
+              }
+            }
+
+            const results = await (new (require("eslint")).ESLint()).lintFiles(".");
+            let lintFiles = 0;
+            let lintErrors = 0;
+            let lintWarnings = 0;
+            let eslintBody = "";
+            const severityIcons = ["ℹ️", "⚠️", "‼️"];
+
+            for (const result of results) {
+              if (result.errorCount || result.warningCount) {
+                lintFiles += 1;
+                lintErrors += result.errorCount;
+                lintWarnings += result.warningCount;
+                eslintBody += `* ${result.filePath}\n\n`;
+                for (const m of result.messages) eslintBody += `  * ${m.line}:${m.column} ${severityIcons[m.severity]} ${m.ruleId || ""} ${m.message}\n`;
+              }
+            }
+
+            if (lintFiles === 0) body += "## ✅ ESLint\n\nNo problems found.";
+            else body += `## ⚠️ ESLint Issues\n
+            <details><summary>Found <b>${lintErrors}</b> error${lintErrors !== 1 ? "s" : ""} \
+            and <b>${lintWarnings}</b> warning${lintWarnings !== 1 ? "s" : ""} \
+            across <b>${lintFiles}</b> file${lintFiles !== 1 ? "s" : ""}.</summary>\n
+            ${eslintBody}</details>\n\n\n---\n*Run \`pnpm lint --fix\` to attempt automatic fixes or review issues manually.*`;
+
+            const typecheck = await exec.getExecOutput("pnpm", ["tsc", "--noEmit"], { ignoreReturnCode: true });
+            body += `\n\n## Typecheck\n\n<details>\n<summary>TypeScript errors</summary>${typecheck.stdout}\n</details>\n`;
+
+            await core.summary.addRaw(body).write();
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
+
+
+      - run: |
+          echo "## Typecheck" >> $GITHUB_STEP_SUMMARY
+          pnpm tsc >> "$GITHUB_STEP_SUMMARY" 
+          gh pr comment ${{ github.event.pull_request.number }} --body-file "$GITHUB_STEP_SUMMARY"
+        continue-on-error: true
+        
